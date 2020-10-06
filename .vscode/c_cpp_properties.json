@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "includePath": [
+                "${workspaceRoot}/**",
+                "${workspaceRoot}/src",
+                "${workspaceRoot}/src/parser",
+                "/usr/include/tarantool"
+            ],
+            "browse": {
+                "path": [ 
+                    "${workspaceRoot}/**",
+                    "${workspaceRoot}/src",
+                    "${workspaceRoot}/src/parser",
+                    "/usr/include/tarantool"
+                ],
+                "limitSymbolsToIncludedHeaders": false
+            }
+        }
+    ],
+    "version": 4
+}

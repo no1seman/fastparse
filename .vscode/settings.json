@@ -1,0 +1,121 @@
+{
+    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "files.associations": {
+        "*.tsx": "typescriptreact",
+        "*.ts": "typescriptreact",
+        "*.jsx": "typescriptreact",
+        "*.lua": "lua",
+        "*.js": "javascriptreact",
+        "*.inc": "cpp",
+        "*.tcc": "cpp",
+        "optional": "cpp",
+        "limits": "cpp",
+        "new": "cpp",
+        "cmath": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "string": "cpp",
+        "iosfwd": "cpp",
+        "unordered_map": "cpp",
+        "array": "cpp",
+        "atomic": "cpp",
+        "cctype": "cpp",
+        "clocale": "cpp",
+        "cstdarg": "cpp",
+        "cstddef": "cpp",
+        "cstdint": "cpp",
+        "cstdio": "cpp",
+        "cstdlib": "cpp",
+        "cstring": "cpp",
+        "cwchar": "cpp",
+        "cwctype": "cpp",
+        "deque": "cpp",
+        "vector": "cpp",
+        "exception": "cpp",
+        "algorithm": "cpp",
+        "iterator": "cpp",
+        "memory": "cpp",
+        "memory_resource": "cpp",
+        "string_view": "cpp",
+        "system_error": "cpp",
+        "tuple": "cpp",
+        "fstream": "cpp",
+        "initializer_list": "cpp",
+        "iostream": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp",
+        "stdexcept": "cpp",
+        "streambuf": "cpp",
+        "cinttypes": "cpp",
+        "typeinfo": "cpp",
+        "bit": "cpp",
+        "functional": "cpp",
+        "numeric": "cpp",
+        "random": "cpp"
+    },
+    "python.pythonPath": "/usr/bin/python3",
+    "actionButtons": {
+        "defaultColor": "#FFFFFF",
+        "loadNpmCommands": false,
+        "reloadButton": "↻",
+        "commands": [
+            {
+                "cwd": "${workspaceFolder}",
+                "name": "Build",
+                "color": "#00FF00",
+                "singleInstance": true,
+                "command": "./scripts/build.sh"
+            },
+            {
+                "cwd": "${workspaceFolder}",
+                "name": "Clean",
+                "color": "#FF0000",
+                "singleInstance": true,
+                "command": "./scripts/clean.sh"
+            },
+            {
+                "cwd": "${workspaceFolder}",
+                "name": "Test",
+                "color": "#0000FF",
+                "singleInstance": true,
+                "command": "./scripts/test.sh"                
+            },
+            {
+                "cwd": "${workspaceFolder}",
+                "name": "PVS analisys",
+                "color": "#FFFFFF",
+                "singleInstance": true,
+                "command": "./scripts/pvs_analisys.sh"   
+            },
+            {
+                "cwd": "${workspaceFolder}",
+                "name": "Serve PVS analisys",
+                "color": "#FFFFFF",
+                "singleInstance": true,
+                "command": "./scripts/serve_pvs_analisys.sh"   
+            },
+            {
+                "cwd": "${workspaceFolder}",
+                "name": "Clang tidy",
+                "color": "#FFFFFF",
+                "singleInstance": true,
+                "command": "./scripts/clang-tidy.sh > clang.log"                 
+            },
+            {
+                "cwd": "${workspaceFolder}",
+                "name": "Build rock",
+                "color": "#FFFFFF",
+                "singleInstance": true,
+                "command": "./scripts/build_rock.sh"                 
+            }
+        ]
+    },
+    "Lua.diagnostics.globals": [
+        "box",
+        "bit",
+    ],
+    "Lua.runtime.version": "LuaJIT"
+}

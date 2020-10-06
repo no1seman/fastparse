@@ -1,0 +1,16 @@
+.old
+.history
+CMakeFiles
+cmake_install.cmake
+CMakeCache.txt
+Makefile
+*.so
+*.a
+staff
+compile_commands.json
+static
+.rocks
+build.luarocks
+*.rock
+*.log
+.travis.yml
