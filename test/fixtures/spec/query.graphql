@@ -1,0 +1,9 @@
+{
+  cluster {
+    users {
+      username
+      fullname
+      email
+    }
+  }
+}

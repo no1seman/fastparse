@@ -1,0 +1,76 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+PROJECT(fastparse C CXX)
+
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
+
+set(TARANTOOL_FIND_REQUIRED ON)
+find_package(Tarantool)
+
+INCLUDE(version)
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -O2")
+
+FIND_PACKAGE(Python3 COMPONENTS Interpreter)
+
+FIND_PACKAGE(BISON 3.7)
+IF (BISON_FOUND)
+  BISON_TARGET(graphqlparser_bison ${PROJECT_SOURCE_DIR}/src/parser/rules/parser.ypp ${PROJECT_SOURCE_DIR}/src/parser/parser.tab.cpp COMPILE_FLAGS -Wnone)
+  SET(BISON_LOCATION_HEADER ${PROJECT_SOURCE_DIR}/src/parser/location.hh)
+ELSE()
+  MESSAGE(FATAL_ERROR "BISON 3.7 is required.")
+ENDIF()
+
+FIND_PACKAGE(FLEX 2.6)
+IF(FLEX_FOUND)
+  FLEX_TARGET(GraphQLScanner ${PROJECT_SOURCE_DIR}/src/lexer/rules/lexer.lpp ${PROJECT_SOURCE_DIR}/src/lexer/lexer.cpp COMPILE_FLAGS "--header-file=${PROJECT_SOURCE_DIR}/src/lexer/lexer.h")
+  IF (BISON_FOUND)
+    ADD_FLEX_BISON_DEPENDENCY(GraphQLScanner graphqlparser_bison)
+  ENDIF()
+ELSE()
+  MESSAGE(FATAL_ERROR "FLEX 2.6 is required.")
+ENDIF()
+
+FUNCTION(GENERATE_AST_FILE FILE_TYPE FILE_RELATIVE_PATH)
+  ADD_CUSTOM_COMMAND(
+    OUTPUT ${PROJECT_SOURCE_DIR}/${FILE_RELATIVE_PATH}
+    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/src/ast/ast.py ${FILE_TYPE} ${PROJECT_SOURCE_DIR}/src/ast/ast.ast > ${PROJECT_SOURCE_DIR}/${FILE_RELATIVE_PATH}
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ast.ast ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ast.py ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/${FILE_TYPE}.py)
+ENDFUNCTION(GENERATE_AST_FILE)
+
+GENERATE_AST_FILE(cxx src/Ast.h)
+GENERATE_AST_FILE(cxx_visitor src/AstVisitor.h)
+GENERATE_AST_FILE(cxx_impl src/Ast.cpp)
+GENERATE_AST_FILE(c src/GraphQLAst.h)
+GENERATE_AST_FILE(c_impl src/GraphQLAst.cpp)
+GENERATE_AST_FILE(c_visitor_impl src/GraphQLAstForEachConcreteType.h)
+
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
+INCLUDE_DIRECTORIES(${TARANTOOL_INCLUDE_DIRS})
+
+ADD_LIBRARY(lib SHARED 
+  ${BISON_graphqlparser_bison_OUTPUTS}
+  ${FLEX_GraphQLScanner_OUTPUTS}
+  ${PROJECT_SOURCE_DIR}/src/Ast.cpp
+  ${PROJECT_SOURCE_DIR}/src/Ast.h
+  ${PROJECT_SOURCE_DIR}/src/AstNode.h
+  ${PROJECT_SOURCE_DIR}/src/AstVisitor.h
+  ${PROJECT_SOURCE_DIR}/src/LuaGraphQLParser.cpp
+  ${PROJECT_SOURCE_DIR}/src/LuaGraphQLParser.h
+  ${PROJECT_SOURCE_DIR}/src/GraphQLAst.h
+  ${PROJECT_SOURCE_DIR}/src/GraphQLAst.cpp
+  ${PROJECT_SOURCE_DIR}/src/GraphQLAstForEachConcreteType.h
+  ${PROJECT_SOURCE_DIR}/src/GraphQLAstNode.cpp
+  ${PROJECT_SOURCE_DIR}/src/GraphQLAstNode.h
+  ${PROJECT_SOURCE_DIR}/src/GraphQLAstToLUA.cpp  
+  ${PROJECT_SOURCE_DIR}/src/GraphQLAstToLUA.h
+  ${PROJECT_SOURCE_DIR}/src/GraphQLAstVisitor.h
+  ${PROJECT_SOURCE_DIR}/src/GraphQLAstVisitor.cpp
+  ${PROJECT_SOURCE_DIR}/src/LuaGraphQLAstVisitor.cpp
+  ${PROJECT_SOURCE_DIR}/src/LuaGraphQLAstVisitor.h)
+
+SET_TARGET_PROPERTIES(lib PROPERTIES PREFIX "")
+TARGET_LINK_LIBRARIES(lib PUBLIC -std=gnu++11)
+
+install(FILES fastparse.lua DESTINATION ${TARANTOOL_INSTALL_LUADIR})
+install(TARGETS lib LIBRARY DESTINATION ${TARANTOOL_INSTALL_LIBDIR}/fastparse)
+
