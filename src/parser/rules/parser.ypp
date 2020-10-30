@@ -46,7 +46,9 @@ using facebook::graphql::ast::FragmentSpread;
 using facebook::graphql::ast::InlineFragment;
 using facebook::graphql::ast::FragmentDefinition;
 using facebook::graphql::ast::Value;
+using facebook::graphql::ast::ValueArr;
 using facebook::graphql::ast::IntValue;
+using facebook::graphql::ast::IntValueArr;
 using facebook::graphql::ast::FloatValue;
 using facebook::graphql::ast::StringValue;
 using facebook::graphql::ast::BooleanValue;
@@ -109,7 +111,9 @@ union yystype {                                         \
     InlineFragment *inlineFragment;                 \
     FragmentDefinition *fragmentDefinition;         \
     Value *value;                                   \
+    ValueArr *valueArr;                             \
     IntValue *intValue;                             \
+    IntValueArr *intValueArr;                       \
     FloatValue *floatValue;                         \
     StringValue *stringValue;                       \
     BooleanValue *booleanValue;                     \
@@ -131,7 +135,7 @@ union yystype {                                         \
     std::vector<std::unique_ptr<Selection>> *selectionList;         \
     std::vector<std::unique_ptr<Field>> *fieldList;                 \
     std::vector<std::unique_ptr<Argument>> *argumentList;           \
-    std::vector<std::unique_ptr<Value>> *valueList;                 \
+    std::vector<std::unique_ptr<ValueArr>> *valueList;              \
     std::vector<std::unique_ptr<ObjectField>> *objectFieldList;     \
     std::vector<std::unique_ptr<Directive>> *directiveList;         \
                                                                     \
@@ -215,6 +219,7 @@ union yystype {                                         \
 %type <variable> variable
 %type <variableValue> variable_value
 %type <intValue> int_value
+%type <intValueArr> int_value_arr
 %type <floatValue> float_value
 %type <stringValue> string_value
 
@@ -257,6 +262,8 @@ union yystype {                                         \
 
 %type <value> value
 %type <value> value_const
+%type <valueArr> value_arr
+%type <valueArr> value_arr_const
 %type <booleanValue> boolean_value
 %type <nullValue> null_value
 %type <enumValue> enum_value
@@ -518,7 +525,13 @@ value:          variable_value { $$ = static_cast<Value *>($1); }
         |       object_value { $$ = static_cast<Value *>($1); }
         ;
 
+value_arr:      int_value_arr { $$ = static_cast<ValueArr *>($1); }
+        ;
+
 int_value:      INTEGER { $$ = new IntValue(@$, strdup($1)); }
+        ;
+
+int_value_arr:  INTEGER { $$ = new IntValueArr(@$, strdup($1)); }
         ;
 
 float_value:    FLOAT { $$ = new FloatValue(@$, strdup($1)); }
@@ -536,6 +549,8 @@ value_const:    int_value { $$ = static_cast<Value *>($1); }
         |       list_value_const { $$ = static_cast<Value *>($1); }
         |       object_value_const { $$ = static_cast<Value *>($1); }
         ;
+
+value_arr_const: int_value_arr { $$ = static_cast<ValueArr *>($1); }
 
 boolean_value:  TRUE { $$ = new BooleanValue(@$, true); }
         |       FALSE { $$ = new BooleanValue(@$, false); }
@@ -566,22 +581,22 @@ enum_value:     DIRECTIVE { $$ = new EnumValue(@$, strdup($1)); }
 
 /* REVIEW: the empty case is inefficient; consider implementing
    ListValue manually. Don't forget to also do list_value_const. */
-list_value:    "[" "]" { $$ = new ListValue(@$, new std::vector<std::unique_ptr<Value>>()); }
+list_value:    "[" "]" { $$ = new ListValue(@$, new std::vector<std::unique_ptr<ValueArr>>()); }
         |       "[" value_list "]" { $$ = new ListValue(@$, $2); }
         ;
 
-value_list:     value { $$ = new std::vector<std::unique_ptr<Value>>(); $$->emplace_back($1); }
-        |       value_list value { $1->emplace_back($2); $$ = $1; }
+value_list:     value_arr { $$ = new std::vector<std::unique_ptr<ValueArr>>(); $$->emplace_back($1); }
+        |       value_list value_arr { $1->emplace_back($2); $$ = $1; }
         ;
 
 list_value_const:
-                "[" "]" { $$ = new ListValue(@$, new std::vector<std::unique_ptr<Value>>()); }
+                "[" "]" { $$ = new ListValue(@$, new std::vector<std::unique_ptr<ValueArr>>()); }
         |       "[" value_const_list "]" { $$ = new ListValue(@$, $2); }
         ;
 
 value_const_list:
-                value_const { $$ = new std::vector<std::unique_ptr<Value>>(); $$->emplace_back($1); }
-        |       value_const_list value_const { $1->emplace_back($2); $$ = $1; }
+                value_arr_const { $$ = new std::vector<std::unique_ptr<ValueArr>>(); $$->emplace_back($1); }
+        |       value_const_list value_arr_const { $1->emplace_back($2); $$ = $1; }
         ;
 
 /* 2.2.7.7 Object Value */

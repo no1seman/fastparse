@@ -124,7 +124,7 @@ static void end_visit_argument_set(const GraphQLAstArgumentSet *argument_set, vo
 static auto visit_argument(const GraphQLAstArgument *argument, void *user_data) -> int
 {
     auto *L = static_cast<lua_State *>(user_data);
-    obj_begin(L);
+    arr_begin(L);
     obj_string(L, "kind", "argument");
     return 1;
 }
@@ -232,6 +232,21 @@ static void end_visit_int_value(const GraphQLAstIntValue *int_value, void *user_
 {
     auto *L = static_cast<lua_State *>(user_data);
     obj_end(L, "value");
+}
+
+static auto visit_int_value_arr(const GraphQLAstIntValueArr *int_value, void *user_data) -> int
+{
+    auto *L = static_cast<lua_State *>(user_data);
+    arr_begin(L);
+    obj_string(L, "kind", "int");
+    obj_string(L, "value", GraphQLAstIntValueArr_get_value(int_value));
+    return 1;
+}
+
+static void end_visit_int_value_arr(const GraphQLAstIntValueArr *int_value, void *user_data)
+{
+    auto *L = static_cast<lua_State *>(user_data);
+    arr_end(L);
 }
 
 static auto visit_float_value(const GraphQLAstFloatValue *float_value, void *user_data) -> int
@@ -344,7 +359,7 @@ static auto visit_object_field(const GraphQLAstObjectField *object_field, void *
 {
     auto *L = static_cast<lua_State *>(user_data);
     obj_begin(L);
-    obj_string(L, "name", GraphQLAstName_get_value(GraphQLAstObjectField_get_name(object_field)));
+    obj_string(L, "name1", GraphQLAstName_get_value(GraphQLAstObjectField_get_name(object_field)));
     return 1;
 }
 
@@ -485,6 +500,8 @@ struct GraphQLAstVisitorCallbacks callbacks_test = {
     .end_visit_variable_value = end_visit_variable_value,
     .visit_int_value = visit_int_value,
     .end_visit_int_value = end_visit_int_value,
+    .visit_int_value_arr = visit_int_value_arr,
+    .end_visit_int_value_arr = end_visit_int_value_arr,
     .visit_float_value = visit_float_value,
     .end_visit_float_value = end_visit_float_value,
     .visit_string_value = visit_string_value,

@@ -100,6 +100,9 @@ O EnumValue
 O ListValue
 O ObjectValue
 
+U ValueArr
+O IntValueArr
+
 T Variable
 S Name name
 
@@ -107,6 +110,9 @@ T VariableValue
 S Name name
 
 T IntValue
+S string value
+
+T IntValueArr
 S string value
 
 T FloatValue
@@ -124,7 +130,7 @@ T EnumValue
 S string value
 
 T ListValue
-P Value values
+P ValueArr values
 
 T ObjectValue
 P ObjectField values
