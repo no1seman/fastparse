@@ -6,7 +6,7 @@ SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
 set(TARANTOOL_FIND_REQUIRED ON)
 find_package(Tarantool)
 
-INCLUDE(version)
+# INCLUDE(version)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -O2")
 
