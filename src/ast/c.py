@@ -54,7 +54,6 @@ def field_prototype(owning_type, type, name, nullable, plural):
             st_name, snake(name), st_name, ret_type)
 
 
-
 class Printer(object):
     '''Printer for the pure C interface to the AST.
 
@@ -108,7 +107,8 @@ extern "C" {
         self._current_type = name
 
     def field(self, type, name, nullable, plural):
-        print(field_prototype(self._current_type, type, name, nullable, plural) + ';')
+        print(field_prototype(self._current_type,
+                              type, name, nullable, plural) + ';')
 
     def end_type(self, name):
         print()

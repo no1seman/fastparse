@@ -31,13 +31,16 @@ using namespace facebook::graphql::ast;  // NOLINT
         self._current_type = name
 
     def field(self, type, name, nullable, plural):
-        print(field_prototype(self._current_type, type, name, nullable, plural) + ' {')
-        print('  const auto *realNode = reinterpret_cast<const %s *>(node);' % self._current_type)
+        print(field_prototype(self._current_type,
+                              type, name, nullable, plural) + ' {')
+        print('  const auto *realNode = reinterpret_cast<const %s *>(node);' %
+              self._current_type)
         title_name = title(name)
         call_get = 'realNode->get%s()' % title_name
         if plural:
             if nullable:
-                print('  return %s ? static_cast<int>(%s->size()) : 0;' % (call_get, call_get))
+                print('  return %s ? static_cast<int>(%s->size()) : 0;' %
+                      (call_get, call_get))
             else:
                 print('  return %s.size();' % call_get)
         else:

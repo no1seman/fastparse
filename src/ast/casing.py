@@ -26,22 +26,24 @@ def snake(s):
         out += c
     return out
 
+
 changes = {
-            'OperationDefinition':'Operation',
-            'IntValue':'Int',
-            'FloatValue':'Float',
-            'StringValue':'String',
-            'BooleanValue':'Boolean',
-            'VariableValue':'Variable',
-            'TypeCondition':'NamedType',
-            'EnumValue':'Enum',
-            'ListValue':'List',
-            'ObjectValue':'InputObject'
+    'OperationDefinition': 'Operation',
+    'IntValue': 'Int',
+    'FloatValue': 'Float',
+    'StringValue': 'String',
+    'BooleanValue': 'Boolean',
+    'VariableValue': 'Variable',
+    'TypeCondition': 'NamedType',
+    'EnumValue': 'Enum',
+    'ListValue': 'List',
+    'ObjectValue': 'InputObject'
 }
+
 
 def short(s):
     '''Make some substitution to get work default Tarantool cartridge graphQL query executor.'''
     for k, v in list(changes.items()):
         if s == k:
-             s = v
+            s = v
     return s[0].lower() + s[1:]

@@ -58,7 +58,8 @@ struct CDeleter {
         base = self._base_class(name)
         # non-deferred!
         print('class %s;' % name)
-        print('class %s : public %s {' % (name, base), file=self._deferredOutput)
+        print('class %s : public %s {' %
+              (name, base), file=self._deferredOutput)
         self._fields = []
 
     def field(self, type, name, nullable, plural):
@@ -76,7 +77,8 @@ struct CDeleter {
         self._print_noncopyable()
         print(file=self._deferredOutput)
         self._print_getters()
-        print('  void accept(visitor::AstVisitor *visitor) const override;', file=self._deferredOutput)
+        print('  void accept(visitor::AstVisitor *visitor) const override;',
+              file=self._deferredOutput)
         print('};', file=self._deferredOutput)
         print(file=self._deferredOutput)
         print(file=self._deferredOutput)
@@ -121,7 +123,7 @@ struct CDeleter {
                 ctor_type = self._ctor_singular_type(type)
             return '      %s %s' % (ctor_type, name)
         print(',\n'.join(ctor_arg(type, name, plural)
-                                                  for (type, name, nullable, plural) in self._fields), file=self._deferredOutput)
+                         for (type, name, nullable, plural) in self._fields), file=self._deferredOutput)
         print('  )', file=self._deferredOutput)
 
         def ctor_init(type, name, plural):
@@ -133,8 +135,8 @@ struct CDeleter {
         print('  : %s(location)%s' % (
             self._base_class(self._type_name), ',' if self._fields else ''), file=self._deferredOutput)
         print(',\n'.join(ctor_init(type, name, plural)
-                                                  for (type, name, nullable, plural)
-                                                  in self._fields), file=self._deferredOutput)
+                         for (type, name, nullable, plural)
+                         in self._fields), file=self._deferredOutput)
         print('  {}', file=self._deferredOutput)
 
     def _getter_type(self, type, nullable, plural):

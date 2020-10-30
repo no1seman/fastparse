@@ -28,7 +28,8 @@ class Printer(object):
         pass
 
     def end_file(self):
-        print(' \\\n'.join('MACRO(%s, %s)' % (name, snake(name)) for name in self._types))
+        print(' \\\n'.join('MACRO(%s, %s)' % (name, snake(name))
+                           for name in self._types))
 
     def start_union(self, name):
         pass
