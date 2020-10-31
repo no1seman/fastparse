@@ -105,6 +105,7 @@ O IntValueArr
 O FloatValueArr
 O StringValueArr
 O BooleanValueArr
+O NullValueArr
 
 T Variable
 S Name name
@@ -137,6 +138,8 @@ T BooleanValueArr
 S boolean value
 
 T NullValue
+
+T NullValueArr
 
 T EnumValue
 S string value

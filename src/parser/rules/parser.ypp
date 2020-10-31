@@ -56,6 +56,7 @@ using facebook::graphql::ast::StringValueArr;
 using facebook::graphql::ast::BooleanValue;
 using facebook::graphql::ast::BooleanValueArr;
 using facebook::graphql::ast::NullValue;
+using facebook::graphql::ast::NullValueArr;
 using facebook::graphql::ast::EnumValue;
 using facebook::graphql::ast::ListValue;
 using facebook::graphql::ast::ObjectValue;
@@ -124,6 +125,7 @@ union yystype {                                         \
     BooleanValue *booleanValue;                     \
     BooleanValueArr *booleanValueArr;               \
     NullValue *nullValue;                           \
+    NullValueArr *nullValueArr;                     \
     EnumValue *enumValue;                           \
     ListValue *arrayValue;                          \
     ObjectValue *objectValue;                       \
@@ -275,6 +277,7 @@ union yystype {                                         \
 %type <booleanValue> boolean_value
 %type <booleanValueArr> boolean_value_arr
 %type <nullValue> null_value
+%type <nullValueArr> null_value_arr
 %type <enumValue> enum_value
 %type <arrayValue> list_value
 %type <arrayValue> list_value_const
@@ -537,7 +540,8 @@ value:          variable_value { $$ = static_cast<Value *>($1); }
 value_arr:      int_value_arr { $$ = static_cast<ValueArr *>($1); }
         |       float_value_arr { $$ = static_cast<ValueArr *>($1); }
         |       string_value_arr { $$ = static_cast<ValueArr *>($1); }
-        |       boolean_value_arr { $$ = static_cast<ValueArr *>($1); }        
+        |       boolean_value_arr { $$ = static_cast<ValueArr *>($1); }
+        |       null_value_arr { $$ = static_cast<ValueArr *>($1); }                
         ;
 
 int_value:      INTEGER { $$ = new IntValue(@$, strdup($1)); }
@@ -571,7 +575,8 @@ value_const:    int_value { $$ = static_cast<Value *>($1); }
 value_arr_const: int_value_arr { $$ = static_cast<ValueArr *>($1); }
         |        float_value_arr { $$ = static_cast<ValueArr *>($1); }
         |        string_value_arr { $$ = static_cast<ValueArr *>($1); }
-        |        boolean_value_arr { $$ = static_cast<ValueArr *>($1); }   
+        |        boolean_value_arr { $$ = static_cast<ValueArr *>($1); }
+        |        null_value_arr { $$ = static_cast<ValueArr *>($1); }           
         ;
 
 boolean_value:  TRUE { $$ = new BooleanValue(@$, true); }
@@ -583,6 +588,9 @@ boolean_value_arr:  TRUE { $$ = new BooleanValueArr(@$, true); }
         ;        
 
 null_value:     NULL { $$ = new NullValue(@$); }
+        ;
+
+null_value_arr:     NULL { $$ = new NullValueArr(@$); }
         ;
 
 enum_value:     DIRECTIVE { $$ = new EnumValue(@$, strdup($1)); }
