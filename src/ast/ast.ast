@@ -104,6 +104,7 @@ U ValueArr
 O IntValueArr
 O FloatValueArr
 O StringValueArr
+O BooleanValueArr
 
 T Variable
 S Name name
@@ -130,6 +131,9 @@ T StringValueArr
 S string value
 
 T BooleanValue
+S boolean value
+
+T BooleanValueArr
 S boolean value
 
 T NullValue

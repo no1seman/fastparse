@@ -324,6 +324,21 @@ static void end_visit_boolean_value(const GraphQLAstBooleanValue *boolean_value,
     obj_end(L, "value");
 }
 
+static auto visit_boolean_value_arr(const GraphQLAstBooleanValueArr *boolean_value, void *user_data) -> int
+{
+    auto *L = static_cast<lua_State *>(user_data);
+    arr_begin(L);
+    obj_string(L, "kind", "boolean");
+    obj_string(L, "value", GraphQLAstBooleanValueArr_get_value(boolean_value) ? "true" : "false");
+    return 1;
+}
+
+static void end_visit_boolean_value_arr(const GraphQLAstBooleanValueArr *boolean_value, void *user_data)
+{
+    auto *L = static_cast<lua_State *>(user_data);
+    arr_end(L);
+}
+
 static auto visit_null_value(const GraphQLAstNullValue *null_value, void *user_data) -> int
 {
     auto *L = static_cast<lua_State *>(user_data);
@@ -529,6 +544,8 @@ struct GraphQLAstVisitorCallbacks callbacks_test = {
     .end_visit_string_value_arr = end_visit_string_value_arr,
     .visit_boolean_value = visit_boolean_value,
     .end_visit_boolean_value = end_visit_boolean_value,
+    .visit_boolean_value_arr = visit_boolean_value_arr,
+    .end_visit_boolean_value_arr = end_visit_boolean_value_arr,
     .visit_null_value = visit_null_value,
     .end_visit_null_value = end_visit_null_value,
     .visit_enum_value = visit_enum_value,
