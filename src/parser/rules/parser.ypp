@@ -50,7 +50,9 @@ using facebook::graphql::ast::ValueArr;
 using facebook::graphql::ast::IntValue;
 using facebook::graphql::ast::IntValueArr;
 using facebook::graphql::ast::FloatValue;
+using facebook::graphql::ast::FloatValueArr;
 using facebook::graphql::ast::StringValue;
+using facebook::graphql::ast::StringValueArr;
 using facebook::graphql::ast::BooleanValue;
 using facebook::graphql::ast::NullValue;
 using facebook::graphql::ast::EnumValue;
@@ -115,7 +117,9 @@ union yystype {                                         \
     IntValue *intValue;                             \
     IntValueArr *intValueArr;                       \
     FloatValue *floatValue;                         \
+    FloatValueArr *floatValueArr;                   \
     StringValue *stringValue;                       \
+    StringValueArr *stringValueArr;                 \
     BooleanValue *booleanValue;                     \
     NullValue *nullValue;                           \
     EnumValue *enumValue;                           \
@@ -221,7 +225,9 @@ union yystype {                                         \
 %type <intValue> int_value
 %type <intValueArr> int_value_arr
 %type <floatValue> float_value
+%type <floatValueArr> float_value_arr
 %type <stringValue> string_value
+%type <stringValueArr> string_value_arr
 
 %type <document> start
 %type <document> document
@@ -526,6 +532,8 @@ value:          variable_value { $$ = static_cast<Value *>($1); }
         ;
 
 value_arr:      int_value_arr { $$ = static_cast<ValueArr *>($1); }
+        |       float_value_arr { $$ = static_cast<ValueArr *>($1); }
+        |       string_value_arr { $$ = static_cast<ValueArr *>($1); }
         ;
 
 int_value:      INTEGER { $$ = new IntValue(@$, strdup($1)); }
@@ -537,7 +545,13 @@ int_value_arr:  INTEGER { $$ = new IntValueArr(@$, strdup($1)); }
 float_value:    FLOAT { $$ = new FloatValue(@$, strdup($1)); }
         ;
 
+float_value_arr:  FLOAT { $$ = new FloatValueArr(@$, strdup($1)); }
+        ;
+
 string_value:   STRING { $$ = new StringValue(@$, strdup($1)); }
+        ;
+
+string_value_arr:   STRING { $$ = new StringValueArr(@$, strdup($1)); }
         ;
 
 value_const:    int_value { $$ = static_cast<Value *>($1); }
@@ -551,6 +565,9 @@ value_const:    int_value { $$ = static_cast<Value *>($1); }
         ;
 
 value_arr_const: int_value_arr { $$ = static_cast<ValueArr *>($1); }
+        |        float_value_arr { $$ = static_cast<ValueArr *>($1); }
+        |        string_value_arr { $$ = static_cast<ValueArr *>($1); }     
+        ;
 
 boolean_value:  TRUE { $$ = new BooleanValue(@$, true); }
         |       FALSE { $$ = new BooleanValue(@$, false); }
