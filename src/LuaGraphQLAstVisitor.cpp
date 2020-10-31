@@ -359,29 +359,16 @@ static auto visit_object_field(const GraphQLAstObjectField *object_field, void *
 {
     auto *L = static_cast<lua_State *>(user_data);
     obj_begin(L);
-    obj_string(L, "name1", GraphQLAstName_get_value(GraphQLAstObjectField_get_name(object_field)));
+
     return 1;
 }
 
 static void end_visit_object_field(const GraphQLAstObjectField *object_field, void *user_data)
 {
     auto *L = static_cast<lua_State *>(user_data);
+    obj_string(L, "name", GraphQLAstName_get_value(GraphQLAstObjectField_get_name(object_field)));
     arr_end(L);
 }
-
-// static auto visit_object_default_field(const GraphQLAstObjectDefaultField *object_field, void *user_data) -> int
-// {
-//     auto *L = static_cast<lua_State *>(user_data);
-//     obj_begin(L);
-//     obj_string(L, "kind", "objectField");
-//     return 1;
-// }
-
-// static void end_visit_object_default_field(const GraphQLAstObjectDefaultField *object_field, void *user_data)
-// {
-//     auto *L = static_cast<lua_State *>(user_data);
-//     arr_end(L);
-// }
 
 static auto visit_directive_set(const GraphQLAstDirectiveSet *directiveSet, void *user_data) -> int
 {
