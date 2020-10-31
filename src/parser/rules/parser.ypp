@@ -58,6 +58,7 @@ using facebook::graphql::ast::BooleanValueArr;
 using facebook::graphql::ast::NullValue;
 using facebook::graphql::ast::NullValueArr;
 using facebook::graphql::ast::EnumValue;
+using facebook::graphql::ast::EnumValueArr;
 using facebook::graphql::ast::ListValue;
 using facebook::graphql::ast::ObjectValue;
 using facebook::graphql::ast::ObjectField;
@@ -127,6 +128,7 @@ union yystype {                                         \
     NullValue *nullValue;                           \
     NullValueArr *nullValueArr;                     \
     EnumValue *enumValue;                           \
+    EnumValueArr *enumValueArr;                     \
     ListValue *arrayValue;                          \
     ObjectValue *objectValue;                       \
     ObjectField *objectField;                       \
@@ -279,6 +281,7 @@ union yystype {                                         \
 %type <nullValue> null_value
 %type <nullValueArr> null_value_arr
 %type <enumValue> enum_value
+%type <enumValueArr> enum_value_arr
 %type <arrayValue> list_value
 %type <arrayValue> list_value_const
 %type <valueList> value_list
@@ -541,7 +544,8 @@ value_arr:      int_value_arr { $$ = static_cast<ValueArr *>($1); }
         |       float_value_arr { $$ = static_cast<ValueArr *>($1); }
         |       string_value_arr { $$ = static_cast<ValueArr *>($1); }
         |       boolean_value_arr { $$ = static_cast<ValueArr *>($1); }
-        |       null_value_arr { $$ = static_cast<ValueArr *>($1); }                
+        |       null_value_arr { $$ = static_cast<ValueArr *>($1); }
+        |       enum_value_arr { $$ = static_cast<ValueArr *>($1); }                 
         ;
 
 int_value:      INTEGER { $$ = new IntValue(@$, strdup($1)); }
@@ -576,7 +580,8 @@ value_arr_const: int_value_arr { $$ = static_cast<ValueArr *>($1); }
         |        float_value_arr { $$ = static_cast<ValueArr *>($1); }
         |        string_value_arr { $$ = static_cast<ValueArr *>($1); }
         |        boolean_value_arr { $$ = static_cast<ValueArr *>($1); }
-        |        null_value_arr { $$ = static_cast<ValueArr *>($1); }           
+        |        null_value_arr { $$ = static_cast<ValueArr *>($1); }
+        |        enum_value_arr { $$ = static_cast<ValueArr *>($1); }                    
         ;
 
 boolean_value:  TRUE { $$ = new BooleanValue(@$, true); }
@@ -610,6 +615,24 @@ enum_value:     DIRECTIVE { $$ = new EnumValue(@$, strdup($1)); }
         |       TYPE { $$ = new EnumValue(@$, strdup($1)); }
         |       UNION { $$ = new EnumValue(@$, strdup($1)); }
         ;
+
+enum_value_arr:     DIRECTIVE { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           ENUM { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           EXTEND { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           FRAGMENT { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           IDENTIFIER { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           IMPLEMENTS { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           INPUT { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           INTERFACE { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           MUTATION { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           ON { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           QUERY { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           SCALAR { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           SCHEMA { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           SUBSCRIPTION { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           TYPE { $$ = new EnumValueArr(@$, strdup($1)); }
+        |           UNION { $$ = new EnumValueArr(@$, strdup($1)); }
+        ;   
 
 /* 2.2.7.6 List Value */
 

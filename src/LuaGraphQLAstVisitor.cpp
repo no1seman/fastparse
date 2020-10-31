@@ -382,6 +382,21 @@ static void end_visit_enum_value(const GraphQLAstEnumValue *enum_value, void *us
     obj_end(L, "defaultValue");
 }
 
+static auto visit_enum_value_arr(const GraphQLAstEnumValueArr *enum_value, void *user_data) -> int
+{
+    auto *L = static_cast<lua_State *>(user_data);
+    arr_begin(L);
+    obj_string(L, "kind", "enum");
+    obj_string(L, "value", GraphQLAstEnumValueArr_get_value(enum_value));
+    return 1;
+}
+
+static void end_visit_enum_value_arr(const GraphQLAstEnumValueArr *enum_value, void *user_data)
+{
+    auto *L = static_cast<lua_State *>(user_data);
+    arr_end(L);
+}
+
 static auto visit_list_value(const GraphQLAstListValue *list_value, void *user_data) -> int
 {
     auto *L = static_cast<lua_State *>(user_data);
@@ -566,6 +581,8 @@ struct GraphQLAstVisitorCallbacks callbacks_test = {
     .end_visit_null_value_arr = end_visit_null_value_arr,
     .visit_enum_value = visit_enum_value,
     .end_visit_enum_value = end_visit_enum_value,
+    .visit_enum_value_arr = visit_enum_value_arr,
+    .end_visit_enum_value_arr = end_visit_enum_value_arr,    
     .visit_list_value = visit_list_value,
     .end_visit_list_value = end_visit_list_value,
     .visit_object_value = visit_object_value,

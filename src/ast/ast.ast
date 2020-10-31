@@ -2,7 +2,7 @@
 
 # Mini-language for AST definition.
 # All AST nodes extend AstNode.
-# All AST nodes are visitible.
+# All AST nodes are visitable.
 # All AST fields have a getter and a setter and are a constructor argument.
 # We have concrete types (code T) and unions (code U).
 # S for singular field, P for plural, ? for nullable.
@@ -106,6 +106,7 @@ O FloatValueArr
 O StringValueArr
 O BooleanValueArr
 O NullValueArr
+O EnumValueArr
 
 T Variable
 S Name name
@@ -142,6 +143,9 @@ T NullValue
 T NullValueArr
 
 T EnumValue
+S string value
+
+T EnumValueArr
 S string value
 
 T ListValue
