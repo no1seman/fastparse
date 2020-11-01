@@ -31,16 +31,15 @@ clang-tidy
 
 ### Clone repo
 
-```bash
-git clone git@github.com:no1seman/fastparse.git fastparse
+```sh
+git clone https://github.com/no1seman/fastparse
 cd fastparse
-npm i
 ```
 
 ### Build rock
 
-```bash
-fastparse/scripts/build_rock.sh
+```sh
+scripts/build_rock.sh
 ```
 
 After build completion you will get:
@@ -52,39 +51,37 @@ After build completion you will get:
 
 #### Install Tarantool Cartridge in test folder
 
-```bash
-    cd fastparse/test
-    tarantoolctl rocks install cartridge
+```sh
+cd fastparse/test
+tarantoolctl rocks install cartridge
 ```
 
 #### Run tests
 
 To test lib simply build rock and then run:
 
-```bash
-fastparse/scripts/test.sh
+```sh
+scripts/test.sh
 ```
 
 ## Install
 
 Run the following command:
 
-```bash
+```sh
 cd <Tarantool Cartridge application dir>
 tarantoolctl rocks install <path to rock file>/fastparse-{version}.{platform}.rock
 ```
 
 Then you need to open {Tarantool Cartridge application dir}/.rocks/share/tarantool/cartridge/graphql.lua in editor and:
 
-1. Comment the line: ```parse = require('cartridge.graphql.parse')```
+1. Comment the line: ```local parse = require('cartridge.graphql.parse')```
 2. Add the following line: ```local parse = require('fastparse')```
 
 After restart of Tarantool Cartridge App it will use "fastparse" instead of vanilla GraphQL parser.
 
 ## Known issues/TODO
 
-- wrong AST structure of array variables;
-- wrong AST structure of array of arguments in some cases;
-- schema parsing switched off;
+- fix schema parsing;
 - make more tests to comply last GraphQL draft spec;
 - add OOM/memory leaks tests;
