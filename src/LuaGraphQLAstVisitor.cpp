@@ -459,6 +459,22 @@ static void end_visit_object_value(const GraphQLAstObjectValue *object_value, vo
     obj_end(L, "value");
 }
 
+static auto visit_object_value_arr(const GraphQLAstObjectValueArr *object_value, void *user_data) -> int
+{
+    auto *L = static_cast<lua_State *>(user_data);
+    obj_begin(L);
+    obj_string(L, "kind", "inputObject");
+    arr_begin(L);
+    return 1;
+}
+
+static void end_visit_object_value_arr(const GraphQLAstObjectValueArr *object_value, void *user_data)
+{
+    auto *L = static_cast<lua_State *>(user_data);
+    obj_end(L, "values");
+    arr_end(L);
+}
+
 static auto visit_object_field(const GraphQLAstObjectField *object_field, void *user_data) -> int
 {
     auto *L = static_cast<lua_State *>(user_data);
@@ -617,12 +633,12 @@ struct GraphQLAstVisitorCallbacks callbacks_test = {
     .end_visit_enum_value_arr = end_visit_enum_value_arr,    
     .visit_list_value = visit_list_value,
     .end_visit_list_value = end_visit_list_value,
-
     .visit_list_value_arr = visit_list_value_arr,
     .end_visit_list_value_arr = end_visit_list_value_arr,
-
     .visit_object_value = visit_object_value,
     .end_visit_object_value = end_visit_object_value,
+    .visit_object_value_arr = visit_object_value_arr,
+    .end_visit_object_value_arr = end_visit_object_value_arr,
     .visit_object_field = visit_object_field,
     .end_visit_object_field = end_visit_object_field,
     .visit_directive_set = visit_directive_set,

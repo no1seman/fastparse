@@ -109,6 +109,7 @@ O BooleanValueArr
 O NullValueArr
 O EnumValueArr
 O ListValueArr
+O ObjectValueArr
 
 T Variable
 S Name name
@@ -160,6 +161,9 @@ T ListValueArr
 P ValueArr values
 
 T ObjectValue
+P ObjectField values
+
+T ObjectValueArr
 P ObjectField values
 
 T ObjectField

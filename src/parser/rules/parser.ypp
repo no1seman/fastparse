@@ -63,6 +63,7 @@ using facebook::graphql::ast::EnumValueArr;
 using facebook::graphql::ast::ListValue;
 using facebook::graphql::ast::ListValueArr;
 using facebook::graphql::ast::ObjectValue;
+using facebook::graphql::ast::ObjectValueArr;
 using facebook::graphql::ast::ObjectField;
 using facebook::graphql::ast::Directive;
 using facebook::graphql::ast::DirectiveSet;
@@ -135,6 +136,7 @@ union yystype {                                         \
     ListValue *arrayValue;                          \
     ListValueArr *arrayValueArr;                    \
     ObjectValue *objectValue;                       \
+    ObjectValueArr *objectValueArr;                 \
     ObjectField *objectField;                       \
     Directive *directive;                           \
     DirectiveSet *directiveSet;                     \
@@ -295,6 +297,8 @@ union yystype {                                         \
 %type <valueList> value_const_list
 %type <objectValue> object_value
 %type <objectValue> object_value_const
+%type <objectValueArr> object_value_arr
+%type <objectValueArr> object_value_const_arr
 %type <objectField> object_field
 %type <objectField> object_field_const
 %type <objectFieldList> object_field_list
@@ -558,7 +562,8 @@ value_arr:      variable_value_arr { $$ = static_cast<ValueArr *>($1); }
         |       boolean_value_arr { $$ = static_cast<ValueArr *>($1); }
         |       null_value_arr { $$ = static_cast<ValueArr *>($1); }
         |       enum_value_arr { $$ = static_cast<ValueArr *>($1); }
-        |       list_value_arr { $$ = static_cast<ValueArr *>($1); }               
+        |       list_value_arr { $$ = static_cast<ValueArr *>($1); }
+        |       object_value_arr { $$ = static_cast<ValueArr *>($1); }                       
         ;
 
 int_value:      INTEGER { $$ = new IntValue(@$, strdup($1)); }
@@ -595,7 +600,8 @@ value_arr_const: int_value_arr { $$ = static_cast<ValueArr *>($1); }
         |        boolean_value_arr { $$ = static_cast<ValueArr *>($1); }
         |        null_value_arr { $$ = static_cast<ValueArr *>($1); }
         |        enum_value_arr { $$ = static_cast<ValueArr *>($1); }
-        |        list_value_const_arr { $$ = static_cast<ValueArr *>($1); }                    
+        |        list_value_const_arr { $$ = static_cast<ValueArr *>($1); }
+        |        object_value_const_arr { $$ = static_cast<ValueArr *>($1); }                            
         ;
 
 boolean_value:  TRUE { $$ = new BooleanValue(@$, true); }
@@ -685,6 +691,10 @@ object_value:   "{" "}" { $$ = new ObjectValue(@$, new std::vector<std::unique_p
         |       "{" object_field_list "}" { $$ = new ObjectValue(@$, $2); }
         ;
 
+object_value_arr:   "{" "}" { $$ = new ObjectValueArr(@$, new std::vector<std::unique_ptr<ObjectField>>()); }
+        |       "{" object_field_list "}" { $$ = new ObjectValueArr(@$, $2); }
+        ;
+
 object_field_list:
                 object_field { $$ = new std::vector<std::unique_ptr<ObjectField>>(); $$->emplace_back($1); }
         |       object_field_list object_field { $1->emplace_back($2); $$ = $1; }
@@ -696,6 +706,11 @@ object_field:   name ":" value { $$ = new ObjectField(@$, $1, $3); }
 object_value_const:
                 "{" "}" { $$ = new ObjectValue(@$, new std::vector<std::unique_ptr<ObjectField>>()); }
         |       "{" object_field_const_list "}" { $$ = new ObjectValue(@$, $2); }
+        ;
+
+object_value_const_arr:
+                "{" "}" { $$ = new ObjectValueArr(@$, new std::vector<std::unique_ptr<ObjectField>>()); }
+        |       "{" object_field_const_list "}" { $$ = new ObjectValueArr(@$, $2); }
         ;
 
 object_field_const_list:
