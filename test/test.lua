@@ -81,22 +81,30 @@ local function table_eq(table1, table2)
     return recurse(table1, table2)
 end
 
-local function test_file(file, file_path, temp_folder, print_diag, parse_type)
-    local start_fast, stop_fast, start_vanilla, stop_vanilla, duration_fast,
-          duration_vanilla
+local function test_file(file, file_path, temp_folder, parse_type)
     -- load request file
     local request = load_file(file_path)
 
+    -- remove old saved files
+    if temp_folder then
+        fio.unlink(fio.pathjoin(temp_folder, file .. '_fast.json'))
+        fio.unlink(fio.pathjoin(temp_folder, file .. '_fast.err'))
+
+        fio.unlink(fio.pathjoin(temp_folder, file .. '_vanilla.json'))
+        fio.unlink(fio.pathjoin(temp_folder, file .. '_vanilla.err'))
+    end
+
     -- make fast parse
-    start_fast = clock.monotonic64()
-    local fast_parse, err
+    local fast_parse, fast_err, vanilla_parse, vanilla_err
 
     if parse_type == 'schema' then
-        fast_parse, err = fastparse.parse_schema(request)
+        fast_parse, fast_err = fastparse.parse_schema(request)
+        vanilla_parse = nil
+        vanilla_err = nil
     else
-        fast_parse, err = fastparse.parse_query(request)
+        fast_parse, fast_err = fastparse.parse_query(request)
+        vanilla_parse, vanilla_err = Parse_Error:pcall(parse.parse, request)
     end
-    stop_fast = clock.monotonic64()
 
     if temp_folder then
         if fast_parse then
@@ -104,107 +112,66 @@ local function test_file(file, file_path, temp_folder, print_diag, parse_type)
                       json.encode(fast_parse))
         else
             save_file(fio.pathjoin(temp_folder, file .. '_fast.err'),
-                      tostring(err))
+                      tostring(fast_err))
+        end
+
+        if parse_type == 'query' then
+            if vanilla_parse then
+                save_file(fio.pathjoin(temp_folder, file .. '_vanilla.json'),
+                        json.encode(vanilla_parse))
+            else
+                save_file(fio.pathjoin(temp_folder, file .. '_vanilla.err'),
+                        tostring(vanilla_err))
+            end
         end
     end
 
-    duration_fast = fast_parse and tonumber(stop_fast - start_fast) / 1000.0 or 0
-
-    -- make vanilla parse
-    start_vanilla = clock.monotonic64()
-    local vanilla_parse
-    vanilla_parse, err = Parse_Error:pcall(parse.parse, request)
-    stop_vanilla = clock.monotonic64()
-    if temp_folder then
-        if vanilla_parse then
-            save_file(fio.pathjoin(temp_folder, file .. '_vanilla.json'),
-                      json.encode(vanilla_parse))
+    if parse_type == 'schema' then
+        if fast_parse then
+            return true
         else
-            save_file(fio.pathjoin(temp_folder, file .. '_vanilla.err'),
-                      tostring(err))
+            return false
+        end
+    else
+        if not fast_parse or not vanilla_parse then
+            return false
+        else
+            return table_eq(vanilla_parse, fast_parse)
         end
     end
-
-    duration_vanilla = fast_parse and tonumber(stop_vanilla - start_vanilla) / 1000.0 or 0
-
-    -- print results
-    if duration_fast and duration_vanilla then
-        if print_diag then
-            print('Fast parse "' .. file .. '.graphql" ' ..
-                      tostring(duration_fast) .. ' us ')
-            print('Vanilla parse "' .. file .. '.graphql" ' ..
-                      tostring(duration_vanilla) .. ' us ')
-            print('"Fast parse" faster than "Vanilla parse": ' ..
-                      tostring(duration_vanilla / duration_fast))
-        end
-        -- check equality of parse results
-        local equal = table_eq(vanilla_parse, fast_parse)
-        if print_diag then
-            print(file .. '.graphql : ' .. tostring(equal))
-        end
-        return equal, duration_fast, duration_vanilla
-    end
-    return false
 end
 
-local function test(folder, temp_folder, iterations, parse_type)
-    if not parse_type or parse_type ~= 'schema' or parse_type ~= 'query' then
+local function test(folder, temp_folder, parse_type)
+    if parse_type == nil and parse_type ~= 'schema' and parse_type ~= 'query' then
         parse_type = 'query'
     end
 
-    local fast = 0
-    local vanilla = 0
     local success = 0
     local fail = 0
     if fio.path.is_dir(fio.abspath(folder)) then
         local files_list, err = fio.glob(fio.pathjoin(folder, '*.graphql'))
 
         if files_list then
-            for i = 1, iterations do
-                for _, file in pairs(files_list) do
-                    local filename = fio.basename(file):sub(0, #fio.basename(
-                                                                file) -
-                                                                #fio.basename(
-                                                                    file):match(
-                                                                    '^.+(%..+)$'))
-                    local file_path = fio.abspath(file)
-                    local temp_path =
-                        temp_folder and fio.abspath(temp_folder) or nil
-                    -- print('Processing: ' .. filename .. ' - ' .. file_path .. ' - '.. temp_path)
-                    local ok, _fast, _vanilla =
-                        test_file(filename, file_path, temp_path, false, parse_type)
+            for _, file in pairs(files_list) do
+                local filename = fio.basename(file):sub(0, #fio.basename(
+                                                            file) -
+                                                            #fio.basename(
+                                                                file):match(
+                                                                '^.+(%..+)$'))
+                local file_path = fio.abspath(file)
+                local temp_path = temp_folder and fio.abspath(temp_folder) or nil
+                local ok = test_file(filename, file_path, temp_path, parse_type)
 
-                    if iterations == 1 then
-                        if ok then
-                            print('\t' .. filename .. ' - ' .. GREEN ..
-                                      'Success' .. RESET)
-                        else
-                            print('\t' .. filename .. ' - ' .. RED .. 'Fail' ..
-                                      RESET)
-                        end
-                    end
-
-                    if ok then
-                        fast = fast + _fast
-                        vanilla = vanilla + _vanilla
-                        success = success + 1
-                    else
-                        fail = fail + 1
-                    end
+                if ok then
+                    success = success + 1
+                    print('\t' .. filename .. ' - ' .. GREEN .. 'Success' .. RESET)
+                else
+                    fail = fail + 1
+                    print('\t' .. filename .. ' - ' .. RED .. 'Fail' .. RESET)
                 end
             end
         end
 
-        if iterations > 1 then
-            print('Total time "vanilla parse": ' .. tostring(vanilla) .. ' us')
-            print('Total time "fast parse": ' .. tostring(fast) .. ' us')
-            print('Iterations: ' .. tostring(iterations))
-            print('Total requests: ' .. tostring(success))
-            print('Total errors: ' .. tostring(fail))
-            local ratio = fast == 0 and 0 or tostring(vanilla / fast)
-            print('"Fast parse" ' .. GREEN .. ratio .. RESET ..
-                      ' times faster than "vanilla parser"!')
-        end
         return true, success, fail
     end
     print('Error: ' .. folder .. ' is not a folder. Nothing to process')
@@ -222,15 +189,114 @@ local function create_folder_if_not_exist(folder)
     return folder
 end
 
+local function print_col(str, width, justify)
+    if justify == 'left' or justify == nil then
+        return str .. string.rep(' ', width - #str)
+    elseif justify == 'center' then
+        local half = math.floor((width - #str)/2)
+        return string.rep(' ', half) .. str .. string.rep(' ', width - #str - half)
+    else
+        return string.rep(' ', width - #str) .. str
+    end
+
+end
+
+local function test_perf(folder, iterations, parse_type)
+    local requests = {}
+    -- load all requests
+    if fio.path.is_dir(fio.abspath(folder)) then
+        local files_list, err = fio.glob(fio.pathjoin(folder, '*.graphql'))
+        if files_list then
+            for _, file in pairs(files_list) do
+                local item = {
+                    request = load_file(fio.abspath(file)),
+                    vanilla = 0,
+                    fast = 0,
+                    name = fio.basename(file):sub(0, #fio.basename(file) -
+                           #fio.basename(file):match('^.+(%..+)$'))
+                }
+                table.insert(requests, item)
+            end
+        else
+            return
+        end
+
+        -- make fast parse
+        local fast_parse, start, duration
+        for index, request in pairs(requests) do
+            for i = 1, iterations do
+                start = clock.realtime64()
+                if parse_type == 'schema' then
+                    fast_parse = fastparse.parse_schema(request.request)
+                else
+                    fast_parse = fastparse.parse_query(request.request)
+                end
+                duration = clock.realtime64() - start
+                if fast_parse then
+                    requests[index].fast = requests[index].fast + tonumber(duration)
+                end
+            end
+        end
+
+        -- make vanilla parse
+        local vanilla_parse
+        for index, request in pairs(requests) do
+            for i = 1, iterations do
+                start = clock.realtime64()
+                vanilla_parse, err = Parse_Error:pcall(parse.parse, request.request)
+                duration = clock.realtime64() - start
+                if vanilla_parse then
+                    requests[index].vanilla = requests[index].vanilla + tonumber(duration)
+                end
+            end
+        end
+
+        print(
+            print_col('Request', 20, 'center') .. ' | ' ..
+            print_col('Iterations', 10, 'center') .. ' | ' ..
+            print_col('Vanilla took time, ms', 22, 'center') .. ' | '..
+            print_col('Fast took time, ms', 22, 'center') .. ' | ' ..
+            print_col('Vanilla, RPS', 15, 'center') .. ' | ' ..
+            print_col('Fast, RPS', 15, 'center') .. ' | ' ..
+            print_col('Fast vs Vanilla ratio', 25, 'center') .. ' | '
+        )
+
+        print(
+            print_col(string.rep('-', 19), 20, 'center') .. ' | ' ..
+            print_col(string.rep('-', 9), 10, 'center') .. ' | ' ..
+            print_col(string.rep('-', 21), 22, 'center') .. ' | '..
+            print_col(string.rep('-', 21), 22, 'center') .. ' | ' ..
+            print_col(string.rep('-', 14), 15, 'center') .. ' | ' ..
+            print_col(string.rep('-', 14), 15, 'center') .. ' | ' ..
+            print_col(string.rep('-', 24), 25, 'center') .. ' | '
+        )
+
+        for i, request in pairs(requests) do
+            print(
+                print_col(request.name, 20, 'left') .. ' | ' ..
+                print_col(tostring(iterations), 10, 'center') .. ' | ' ..
+                print_col(string.format('%.3f', request.vanilla/1e6), 22, 'center').. ' | '..
+                print_col(string.format('%.3f', request.fast/1e6), 22, 'center').. ' | ' ..
+                print_col(tostring(math.floor(1/(request.vanilla/1e9/iterations))), 15, 'right').. ' | ' ..
+                print_col(tostring(math.floor(1/(request.fast/1e9/iterations))), 15, 'right').. ' | ' ..
+                print_col(string.format('%.3f', request.vanilla/request.fast), 25, 'right').. ' | '
+            )
+        end
+    end
+end
+
 print('GraphQL spec test:')
-test('./fixtures/spec', create_folder_if_not_exist('tmp/spec'), 1)
+test('./fixtures/spec', create_folder_if_not_exist('tmp/spec'), 'query')
 
 print('Tarantool Cartridge parser compatibility test:')
-test('./fixtures/execution/', create_folder_if_not_exist('tmp/execution'), 1, 'query')
+test('./fixtures/execution/', create_folder_if_not_exist('tmp/execution'), 'query')
 
 print('Schema parse test:')
-test('./fixtures/schema/', create_folder_if_not_exist('./tmp/schema'), 1, 'schema')
+test('./fixtures/schema/', create_folder_if_not_exist('tmp/schema'), 'schema')
 
-print('Performance test:')
-test('./fixtures/execution/', nil, 100)
+print('\nPerformance test (short run):')
+test_perf('./fixtures/execution/', 1, 'query')
+
+print('\nPerformance test (long run):')
+test_perf('./fixtures/execution/', 10000, 'query')
 

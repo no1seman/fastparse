@@ -10,42 +10,41 @@ extend schema @addFields(source: "Users") {
   query: Query3
 }
 
+query get_self_data($size: Int, $blur: Float) @addExternalFields(source: "profiles") {
+  servers(uuid: "62f84a53-8dc1-45a1-8dd5-f002bf400590", id: 3) {
+    alias:boxinfo @skip(if: false) {
+      network {
+        io_collect_interval
+        readahead
+        net_msg_max
+        ...HumanFragment
+        smallPic: picture(size: 64)
+        bigPic: picture(size: $size, blur: $blur)
+        ... on User {
+          friends {
+            counts
+          }
+        }
+      }
+    }
+  }
+}
 
-# query get_self_data($size: Int, $blur: Float) @addExternalFields(source: "profiles") {
-#   servers(uuid: "62f84a53-8dc1-45a1-8dd5-f002bf400590", id: 3) {
-#     alias:boxinfo @skip(if: false) {
-#       network {
-#         io_collect_interval
-#         readahead
-#         net_msg_max
-#         ...HumanFragment
-#         smallPic: picture(size: 64)
-#         bigPic: picture(size: $size, blur: $blur)
-#         ... on User {
-#           friends {
-#             counts
-#           }
-#         }
-#       }
-#     }
-#   }
-# }
+fragment HumanFragment on Human {
+  name
+  homePlanet
+}
 
-# fragment HumanFragment on Human {
-#   name
-#   homePlanet
-# }
+query Humans{
+  luke: human(id: "1000") {
+    ...HumanFragment
+  }
+  leia: human(id: "1003") {
+    ...HumanFragment
+  }
+}
 
-# query Humans{
-#   luke: human(id: "1000") {
-#     ...HumanFragment
-#   }
-#   leia: human(id: "1003") {
-#     ...HumanFragment
-#   }
-# }
-
-# type Human {
-#   id: ID!
-#   name: String!
-# }
+type Human {
+  id: ID!
+  name: String!
+}

@@ -4,7 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 
 query queryName($foo: ComplexType, $site: Site = MOBILE) {
-  whoever123is: node(id: [123, 456]) {
+  whoever123is: node(id: [{ lon: 12.43, lat: -53.211 }, { lon: -8.11, lat: 50.35 }] ) {
     id ,
     ... on User @defer {
       field2 {
@@ -50,7 +50,7 @@ fragment frag on Friend {
 }
 
 # {
-#   unnamed(truthy: true, falsey: false, nullish: null),
+#   unnamed(truthy: true, falsy: false, nullish: null),
 #   query
 # }
 
