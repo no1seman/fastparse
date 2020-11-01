@@ -101,6 +101,7 @@ O ListValue
 O ObjectValue
 
 U ValueArr
+O VariableValueArr
 O IntValueArr
 O FloatValueArr
 O StringValueArr
@@ -112,6 +113,9 @@ T Variable
 S Name name
 
 T VariableValue
+S Name name
+
+T VariableValueArr
 S Name name
 
 T IntValue

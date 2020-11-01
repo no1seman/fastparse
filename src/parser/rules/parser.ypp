@@ -36,6 +36,7 @@ using facebook::graphql::ast::VariableDefinitionSet;
 using facebook::graphql::ast::VariableDefinition;
 using facebook::graphql::ast::Variable;
 using facebook::graphql::ast::VariableValue;
+using facebook::graphql::ast::VariableValueArr;
 using facebook::graphql::ast::SelectionSet;
 using facebook::graphql::ast::Selection;
 using facebook::graphql::ast::Field;
@@ -106,6 +107,7 @@ union yystype {                                         \
     VariableDefinition *variableDefinition;             \
     Variable *variable;                                 \
     VariableValue *variableValue;                       \
+    VariableValueArr *variableValueArr;                 \
     SelectionSet *selectionSet;                     \
     Selection *selection;                           \
     Field *field;                                   \
@@ -228,6 +230,7 @@ union yystype {                                         \
 
 %type <variable> variable
 %type <variableValue> variable_value
+%type <variableValueArr> variable_value_arr
 %type <intValue> int_value
 %type <intValueArr> int_value_arr
 %type <floatValue> float_value
@@ -450,7 +453,11 @@ variable:       VARIABLE { $$ = new Variable(@$, new Name(@1, strdup($1))); }
 
 variable_value:       
                 VARIABLE { $$ = new VariableValue(@$, new Name(@1, strdup($1))); }
-        ;        
+        ;
+
+variable_value_arr:       
+                VARIABLE { $$ = new VariableValueArr(@$, new Name(@1, strdup($1))); }
+        ;                
 
 variable_definition:
                 variable ":" type default_value_opt directive_set_opt { $$ = new VariableDefinition(@$, $1, $3, $4, $5); }
@@ -540,7 +547,8 @@ value:          variable_value { $$ = static_cast<Value *>($1); }
         |       object_value { $$ = static_cast<Value *>($1); }
         ;
 
-value_arr:      int_value_arr { $$ = static_cast<ValueArr *>($1); }
+value_arr:      variable_value_arr { $$ = static_cast<ValueArr *>($1); }
+        |       int_value_arr { $$ = static_cast<ValueArr *>($1); }
         |       float_value_arr { $$ = static_cast<ValueArr *>($1); }
         |       string_value_arr { $$ = static_cast<ValueArr *>($1); }
         |       boolean_value_arr { $$ = static_cast<ValueArr *>($1); }

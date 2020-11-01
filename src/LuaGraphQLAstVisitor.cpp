@@ -219,6 +219,20 @@ static void end_visit_variable_value(const GraphQLAstVariableValue *variable_val
     obj_end(L, "value");
 }
 
+static auto visit_variable_value_arr(const GraphQLAstVariableValueArr *variable_value, void *user_data) -> int
+{
+    auto *L = static_cast<lua_State *>(user_data);
+    arr_begin(L);
+    obj_string(L, "kind", "variable");
+    return 1;
+}
+
+static void end_visit_variable_value_arr(const GraphQLAstVariableValueArr *variable_value, void *user_data)
+{
+    auto *L = static_cast<lua_State *>(user_data);
+    arr_end(L);
+}
+
 static auto visit_int_value(const GraphQLAstIntValue *int_value, void *user_data) -> int
 {
     auto *L = static_cast<lua_State *>(user_data);
@@ -559,6 +573,8 @@ struct GraphQLAstVisitorCallbacks callbacks_test = {
     .end_visit_variable = end_visit_variable,
     .visit_variable_value = visit_variable_value,
     .end_visit_variable_value = end_visit_variable_value,
+    .visit_variable_value_arr = visit_variable_value_arr,
+    .end_visit_variable_value_arr = end_visit_variable_value_arr,
     .visit_int_value = visit_int_value,
     .end_visit_int_value = end_visit_int_value,
     .visit_int_value_arr = visit_int_value_arr,
