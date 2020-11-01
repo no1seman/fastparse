@@ -108,6 +108,7 @@ O StringValueArr
 O BooleanValueArr
 O NullValueArr
 O EnumValueArr
+O ListValueArr
 
 T Variable
 S Name name
@@ -153,6 +154,9 @@ T EnumValueArr
 S string value
 
 T ListValue
+P ValueArr values
+
+T ListValueArr
 P ValueArr values
 
 T ObjectValue
