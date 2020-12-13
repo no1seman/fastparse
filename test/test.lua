@@ -224,14 +224,15 @@ local function test_perf(folder, iterations, parse_type)
         -- make fast parse
         local fast_parse, start, duration
         for index, request in pairs(requests) do
+            print('Fast parsing: ' .. request.name)
             for i = 1, iterations do
-                start = clock.realtime64()
+                start = clock.monotonic64()
                 if parse_type == 'schema' then
                     fast_parse = fastparse.parse_schema(request.request)
                 else
                     fast_parse = fastparse.parse_query(request.request)
                 end
-                duration = clock.realtime64() - start
+                duration = clock.monotonic64() - start
                 if fast_parse then
                     requests[index].fast = requests[index].fast + tonumber(duration)
                 end
@@ -241,10 +242,11 @@ local function test_perf(folder, iterations, parse_type)
         -- make vanilla parse
         local vanilla_parse
         for index, request in pairs(requests) do
+            print('Vanilla parsing: ' .. request.name)
             for i = 1, iterations do
-                start = clock.realtime64()
+                start = clock.monotonic64()
                 vanilla_parse, err = Parse_Error:pcall(parse.parse, request.request)
-                duration = clock.realtime64() - start
+                duration = clock.monotonic64() - start
                 if vanilla_parse then
                     requests[index].vanilla = requests[index].vanilla + tonumber(duration)
                 end
@@ -298,5 +300,4 @@ print('\nPerformance test (short run):')
 test_perf('./fixtures/execution/', 1, 'query')
 
 print('\nPerformance test (long run):')
-test_perf('./fixtures/execution/', 10000, 'query')
-
+test_perf('./fixtures/execution/', 1000, 'query')

@@ -46,9 +46,9 @@ struct CDeleter {
     def end_file(self):
         print()
         print(self._deferredOutput.getvalue())
-        print('}')
-        print('}')
-        print('}')
+        print('}  // namespace ast')
+        print('}  // namespace graphql')
+        print('}  // namespace facebook')
 
     def _base_class(self, type):
         return self._bases.get(type, 'Node')

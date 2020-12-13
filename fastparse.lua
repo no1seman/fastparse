@@ -1,6 +1,6 @@
-local graphqlparser = require("fastparse.lib")
-local checks = require("checks")
-local errors = require("errors")
+local graphqlparser = require('fastparse.lib')
+local checks = require('checks')
+local errors = require('errors')
 
 local Fast_Parse_Error = errors.new_class("GraphQL fastparse error")
 
